@@ -2,7 +2,7 @@ from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
 
-API_KEY = os.getenv("API_KEY", "intelligence-reports-2024")
+API_KEY = os.getenv("API_KEY", "Ran's-BE-Project")
 
 security = HTTPBearer()
 
