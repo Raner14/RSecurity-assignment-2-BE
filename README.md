@@ -9,15 +9,18 @@ A REST API service for managing intelligence reports built with FastAPI.
 - API key authentication
 - SQLite database storage
 - Docker containerization
-- Professional error handling
 
 ## Quick Start
 
-### Local Development
+You can run this project in two ways:
 
-#### 1. Create a virtual environment 
+### Option 1: Virtual Environment
 
-It is best practice to use a **virtual environment** so dependencies are isolated from the system Python.
+**Best for:** Development with hot reload  
+**Requirements:** Python 3.10+ installed
+
+1. Create a virtual environment: 
+
 
 **Windows (PowerShell):**
 ```powershell
@@ -38,17 +41,19 @@ To exit the virtual environment:
 deactivate
 ```
 
-#### 2. Run the server
+2. Run the server
 ```bash
 uvicorn main:app --reload
 ```
 
 The API will be available at `http://localhost:8000`
 
-### Docker
+### Option 2: Docker
 
-  - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running  
-    (on Windows it requires **WSL2** enabled)
+**Best for:** Production-like environment - runs the same everywhere  
+**Requirements:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running (on Windows requires **WSL2**)
+
+**What Docker does:** Creates a mini Linux computer with Python 3.10 and runs your app in complete isolation.
 
 
 1. Build the image:
@@ -61,6 +66,8 @@ docker build -t intelligence-reports-api .
 docker run -p 8000:8000 -e API_KEY="Ran's-BE-Project" intelligence-reports-api
 ```
 
+The API will be available at `http://localhost:8000`
+
 ## API Documentation
 
 Interactive API documentation is available at:
@@ -68,112 +75,34 @@ Interactive API documentation is available at:
 
 ---
 
-## Swagger UI
+### Using Swagger UI
 
-When you open [http://localhost:8000/docs](http://localhost:8000/docs) in Chrome you see **Swagger UI**, an interactive documentation tool.  
+1. Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser
+2. Click the **🔒 Authorize** button
+3. Enter: `Ran's-BE-Project`
+4. Click **Authorize** → **Close**
+5. Now you can test all endpoints directly from the browser!
 
-- **Top bar**: API title and version  
-- **Authorize button (🔒)**: Click to enter your API key once, so all requests will automatically include it.  
-  - Enter: `Ran's-BE-Project`  
-  - Press **Authorize** → **Close**  
-- **Endpoints list**: Each endpoint (`POST /report`, `GET /reports`, etc.) shows description, parameters, request body, and possible responses.  
-- **Try it out**: Lets you send real requests directly from the browser.
+## API Endpoints (Quick Reference)
 
----
+### Main Endpoints:
+- `POST /report` - Create new report
+- `GET /report/{id}` - Get specific report  
+- `GET /reports` - List all reports (with filtering: `?tag=security&search=incident`)
+- `GET /health` - Health check (no auth needed)
 
-
-## Authentication
-
-All endpoints (except `/health`) require an API key passed as a Bearer token in the Authorization header.
-
-Default API key: `Ran's-BE-Project`
-
-Set custom API key using environment variable:
-```bash
-export API_KEY=Ran's-BE-Project
-```
-
-## API Endpoints
-
-### POST /report
-Create a new intelligence report.
-
-**Headers:**
-```
-Authorization: Bearer Ran's-BE-Project
-Content-Type: application/json
-```
-
-**Request Body:**
+### Example Request Body for POST /report:
 ```json
 {
-    "title": "Security Incident Report",
-    "content": "Detailed description of the security incident...",
-    "tags": ["security", "incident", "urgent"]
+    "title": "Cyber Attack Detection",
+    "content": "Suspicious activity detected on network segment 192.168.1.0/24. Multiple failed login attempts from IP 10.0.0.15. Recommend immediate investigation.",
+    "tags": ["security", "network", "urgent", "investigation"]
 }
 ```
 
-### GET /report/{id}
-Fetch a specific report by ID.
+## Authentication
 
-**Headers:**
-```
-Authorization: Bearer Ran's-BE-Project
-```
-
-### GET /reports
-List all reports with optional filtering.
-
-**Query Parameters:**
-- `tag`: Filter by tag (e.g., `?tag=security`)
-- `search`: Search in title and content (e.g., `?search=incident`)
-
-**Headers:**
-```
-Authorization: Bearer Ran's-BE-Project
-```
-
-### GET /health
-Health check endpoint (no authentication required).
-
-## Testing Examples
-
-### Using curl
-
-1. **Create a report:**
-```bash
-curl -X POST "http://localhost:8000/report"   -H "Authorization: Bearer Ran's-BE-Project"   -H "Content-Type: application/json"   -d '{
-    "title": "Network Breach Investigation",
-    "content": "Suspicious network activity detected on server farm alpha. Initial investigation reveals potential unauthorized access attempt.",
-    "tags": ["security", "network", "investigation"]
-  }'
-```
-
-2. **Get all reports:**
-```bash
-curl -X GET "http://localhost:8000/reports"   -H "Authorization: Bearer Ran's-BE-Project"
-```
-
-3. **Filter by tag:**
-```bash
-curl -X GET "http://localhost:8000/reports?tag=security"   -H "Authorization: Bearer Ran's-BE-Project"
-```
-
-4. **Search reports:**
-```bash
-curl -X GET "http://localhost:8000/reports?search=network"   -H "Authorization: Bearer Ran's-BE-Project"
-```
-
-5. **Get specific report:**
-```bash
-curl -X GET "http://localhost:8000/report/{report-id}"   -H "Authorization: Bearer Ran's-BE-Project"
-```
-
-### Using Postman
-
-1. Set up environment variable `API_KEY` = `Ran's-BE-Project`
-2. Add Authorization header: `Bearer {{API_KEY}}`
-3. Use the endpoints as described above
+All endpoints (except `/health`) require API key: `Ran's-BE-Project`
 
 ## Project Structure
 
@@ -187,30 +116,10 @@ curl -X GET "http://localhost:8000/report/{report-id}"   -H "Authorization: Bear
 └── README.md        # This file
 ```
 
-## Database
-
-The application uses SQLite for data persistence. The database file `reports.db` will be created automatically in the project directory.
-
-## Error Handling
-
-The API returns appropriate HTTP status codes:
-- `200`: Success
-- `201`: Created
-- `401`: Unauthorized (invalid API key)
-- `404`: Not Found
-- `422`: Validation Error
-
 ---
 
-## Running with Docker vs. Local Development
+## Docker vs. Virtual Environment
 
-- **Docker**: Runs the application inside an isolated container, independent of your system.  
-  - Ensures consistent environment ("works on my machine" problem solved)  
-  - Easy to deploy on servers or share with others  
-  - Requires Docker Desktop running in the background  
-
-- **Local (venv)**: Runs directly on your own Python environment.  
-  - Easier for fast development and debugging (with hot reload)  
-  - Depends on your local Python and libraries  
-  - Best for coding and testing during development
+- **Docker**: Isolated Linux environment - consistent everywhere, best for deployment
+- **Virtual Environment**: Uses your local Python - faster for development with hot reload
 
